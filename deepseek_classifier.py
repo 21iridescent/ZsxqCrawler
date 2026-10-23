@@ -60,7 +60,19 @@ _BALANCE_HINTS = (
 
 _SECRET_RE = re.compile(r"(Bearer\s+)\S+|sk-[A-Za-z0-9_\-]{8,}", re.IGNORECASE)
 
-SYSTEM_PROMPT = """你是卖方研报分类器。根据给定研报标题和正文，只输出一个 JSON 对象，不要使用 Markdown 代码块，不要输出额外说明。
+# Style for the summary string. Describes how to write, not any one report.
+SUMMARY_PROMPT = """\
+用白话中文写，结论先行，写短，少行话、少翻译腔。只根据给定的这一篇来写，不要套用别的研报里的公司、数字或结论。
+先用一两句话写出整体判断。后面按这篇材料往下写，材料里没有的部分就省略：
+- 现在怎么了
+- 关键风险，保留具体数字和阈值
+- 分地区或 EPS 的含义（正文谈到才写）
+- 可以买什么、避开什么
+- 近期日历，以及会改变判断的触发点
+数字和门槛用正文里的具体值，不要改成“大幅”“较高”这类含糊说法。读起来像在跟人讲。这段里可以用短标题或几条列表。
+"""
+
+SYSTEM_PROMPT = f"""你是卖方研报分类器。根据给定研报标题和正文，只输出一个 JSON 对象。不要用 Markdown 代码块包裹整个结果，不要在 JSON 外面加说明。
 JSON 字段：
 - report_type: 只能是 公司研究、行业研究、策略、宏观、固收、金工、其他 之一
 - institution: 出具机构，无法判断则为空字符串
@@ -69,8 +81,11 @@ JSON 字段：
 - tickers: 证券代码数组，没有则为 []
 - industries: 行业名称数组，没有则为 []
 - sentiment: 只能是 正面、中性、负面、不确定 之一
-- summary: 不超过 120 个汉字的摘要
+- summary: 字符串，写法见下方「摘要」
 - tags: 主题标签数组，最多 8 个
+
+摘要：
+{SUMMARY_PROMPT.strip()}
 """
 
 

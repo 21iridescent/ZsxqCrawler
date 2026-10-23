@@ -267,6 +267,26 @@ class FallbackTests(unittest.TestCase):
         self.assertTrue(captured["url"].endswith("/chat/completions"))
 
 
+class SummaryPromptTests(unittest.TestCase):
+    def test_summary_prompt_encodes_style_without_a_fixed_report(self) -> None:
+        text = dc.SUMMARY_PROMPT
+        self.assertIn(text.strip(), dc.SYSTEM_PROMPT)
+        for phrase in (
+            "结论先行",
+            "现在怎么了",
+            "关键风险",
+            "EPS",
+            "避开",
+            "日历",
+            "触发点",
+        ):
+            self.assertIn(phrase, text)
+        self.assertNotIn("120", dc.SYSTEM_PROMPT)
+        for banned in ("贵州茅台", "宁德时代", "600519", "000001.SZ", "示例公司"):
+            self.assertNotIn(banned, text)
+            self.assertNotIn(banned, dc.SYSTEM_PROMPT)
+
+
 class EnvExampleTests(unittest.TestCase):
     def test_example_documents_openrouter_without_secrets(self) -> None:
         text = (ROOT / ".env.example").read_text(encoding="utf-8")
